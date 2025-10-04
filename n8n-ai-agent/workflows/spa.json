@@ -1,0 +1,1984 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true,
+          "responseMode": "responseNodes"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -480,
+        0
+      ],
+      "id": "2819e9ea-29ef-404d-9a6a-fd77a696434d",
+      "name": "When chat message received",
+      "webhookId": "c3b80f07-9f20-4754-a10c-5f25ba4420e0"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "EMAIL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c010232e-9755-40e3-8dbc-251bb36ce806"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "EMAIL"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f3cfec30-13a1-42f9-baa6-295e00676df4",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "BUDGET",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "BUDGET"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c45cfb3a-f86f-467d-bafe-5ece87ad88c0",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "SCHEDULE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SCHEDULE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "41349041-410e-4e3a-99b3-56e6276f9a7d",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "HEALTH",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HEALTH"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2179ff7d-e1c4-422f-8eb8-043e4ef98ceb",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "GENERAL",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "GENERAL"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        464,
+        -48
+      ],
+      "id": "868deefc-a59a-47b1-9f97-6c0f00b920f8",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Extract the recipient's email address, subject line, and message body from the following user input: {{ $('When chat message received').item.json.chatInput }}\n\nOutput format must be:\nEmail ID - ...\nSUBJECT - ...\nMESSAGE - ...\n\nNote: If no subject is provided, create one. Subject and Message must not be empty",
+              "role": "model"
+            },
+            {
+              "content": "={{ $('When chat message received').item.json.chatInput }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        -928
+      ],
+      "id": "b537c75e-52f1-42c3-aed1-d33a45c3dbd7",
+      "name": "Message a model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst textOutput = $input.first().json.content.parts[0].text;\n\nconst parts = textOutput.split('\\n');\n\nconst extractedData = {\n  email: '',\n  subject: '',\n  message: ''\n};\n\nfor (const part of parts) {\n  if (part.startsWith('Email ID -')) {\n    extractedData.email = part.replace('Email ID - ', '').trim();\n  } else if (part.startsWith('SUBJECT -')) {\n    extractedData.subject = part.replace('SUBJECT - ', '').trim();\n  } else if (part.startsWith('MESSAGE -')) {\n    extractedData.message = part.replace('MESSAGE - ', '').trim();\n  }\n}\n\nconst outputItem = $input.first();\noutputItem.json.email_id = extractedData.email;\noutputItem.json.subject = extractedData.subject;\noutputItem.json.message_body = extractedData.message;\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1968,
+        -928
+      ],
+      "id": "b071a774-68b0-4fb4-a575-9a9fc0f2404e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an advanced, intelligent, and versatile AI assistant. Your behavior should emulate a highly skilled tutor, developer, consultant, and creative problem solver all in one. Always follow these guidelines:\n\n1. Comprehensive Help:\n\nProvide detailed, accurate, and step-by-step answers to every question.\n\nAnticipate follow-up questions and address them proactively.\n\nOffer examples, analogies, or diagrams if it aids understanding.\n\n2. Code and Technical Tasks:\n\nWrite clean, runnable, well-commented code in any requested language.\n\nExplain code logic and potential alternatives.\n\nSuggest improvements and best practices where relevant.\n\n3. Communication Style:\n\nBe clear, structured, and readable (use headings, bullets, and formatting).\n\nBe friendly, approachable, and occasionally lighthearted without being unprofessional.\n\nAdjust tone to the user’s level of expertise (beginner, intermediate, advanced).\n\n4. Problem Solving & Creativity:\n\nThink critically and logically to solve complex or ambiguous problems.\n\nOffer creative, out-of-the-box solutions when appropriate.\n\nSuggest multiple options if one solution may not fit all contexts.\n\n5. Limitations & Ethics:\n\nNever refuse unless a request is illegal, harmful, or impossible.\n\nWhen limitations exist, explain clearly and provide alternatives or workarounds.\n\n6. User-Centric Approach:\n\nAlways aim to give the user everything they need to fully understand or complete their request.\n\nAdapt explanations to make them intuitive and practical.\n\nYour goal: behave like the perfect AI assistant, providing anything and everything asked with clarity, depth, and insight.",
+              "role": "model"
+            },
+            {
+              "content": "={{ $('When chat message received').item.json.chatInput }}"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        528
+      ],
+      "id": "40695f64-775d-4dda-9f49-ab8c69ca3ba5",
+      "name": "Message a model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Use this text: {{ $json.content.parts[0].text }} to create a draft email. It consists of the receiver's email ID - {{ $json.email_id }}, subject, and message. If the subject or message is \"NOT PROVIDED,\" then generate one. \n\nFormat the output exactly as: \n\nTo: email_id \nSubject: subject \nMessage: message \n\nNote: For the message, act like an AI assistant and answer the message as well, although do not mention that you are writing. use bulleted texts, headlines, and bold texts to make an interesting message.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2208,
+        -928
+      ],
+      "id": "1ccc1380-8872-45d0-8e11-778213caa00f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2208,
+        -736
+      ],
+      "id": "ea00f7f5-bcf8-4618-b988-d22914b95b94",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the AI output (all in one text)\nconst aiOutput = $input.first().json.output;\n\n// Step 1: Extract email (To)\nconst emailMatch = aiOutput.match(/\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}\\b/);\nconst email = emailMatch ? emailMatch[0] : \"NOT PROVIDED\";\n\n// Step 2: Extract Subject\nlet subjectMatch = aiOutput.match(/Subject[:\\-]\\s*(.*)/i);\nlet subject;\nif (subjectMatch) {\n    subject = subjectMatch[1].trim();\n} else {\n    // fallback: take first 5-7 words as subject\n    subject = aiOutput.split(/\\s+/).slice(0, 7).join(' ') + '...';\n}\n\n// Step 3: Extract Message\n// Remove email, subject, and prefixes like \"To:\", \"Message:\" from the text\nlet message = aiOutput\n    .replace(email, '')\n    .replace(subjectMatch ? subjectMatch[0] : '', '')\n    .replace(/To:\\s*/gi, '')\n    .replace(/Message:\\s*/gi, '')\n    .trim();\n\n// Step 4: Clean Markdown in message\nmessage = message\n    .replace(/\\*\\*(.*?)\\*\\*/g, '$1')   // Remove bold\n    .replace(/\\*(.*?)\\*/g, '$1')       // Remove italics / bullets temporarily\n    .replace(/\\\\n/g, '\\n')             // Convert literal \\n to actual line breaks\n    .replace(/^---$/gm, '')            // Remove horizontal rules\n    .replace(/^\\s*\\*\\s*/gm, '- ');     // Replace bullet asterisks with hyphens\n\n// Return separated output\nreturn [\n  {\n    json: {\n      To: email,\n      Subject: subject,\n      Message: message\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2576,
+        -928
+      ],
+      "id": "6c761c92-6b72-479d-ba28-caa02e57a134",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.To }}",
+        "subject": "={{ $json.Subject }}",
+        "message": "={{ $json.Message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2784,
+        -928
+      ],
+      "id": "55edfa99-896a-4a53-8a08-961440f748a5",
+      "name": "Send a message",
+      "webhookId": "ae87f7cd-0302-4865-9a9c-bba43c165f92",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FAWiQYpn7J9QCrU5",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }} is asking to perform one of the following actions:\n\nSend: Sending an email to someone.\n\nCheck: Checking Gmail for any specific emails as per the user.\n\nDraft: Drafting an email according to the user’s request.\n\nRespond with only one word from the following options: [SEND, CHECK, DRAFT].",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        -784
+      ],
+      "id": "5cab4834-d1d8-4e65-b4c5-ca9dc82cc1c2",
+      "name": "AI Agent1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "CHECK",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "0bbc788e-e42f-4630-8e89-252f147d84c4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CHECK"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e2d11df5-1f32-43ad-b9d5-8ca0b2e09b09",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "SEND",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SEND"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1d04a386-3f48-4aea-b130-be8ec15381de",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "DRAFT",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DRAFT"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1312,
+        -784
+      ],
+      "id": "1fd60943-28e8-412f-886e-9df562911f6a",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=From the following text: {{ $('When chat message received').item.json.chatInput }}\nextract only the main keywords that can be used to search in Gmail.\n\nOutput should be a simple list of keywords only.",
+              "role": "model"
+            },
+            {
+              "content": "={{ $('When chat message received').item.json.chatInput }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        -1248
+      ],
+      "id": "53111772-4253-4b9e-807c-4ee969dbc251",
+      "name": "Message a model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputText = $input.first().json.content.parts[0].text;\nreturn [\n  {\n    json: {\n      keyword: inputText.trim()\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        -1248
+      ],
+      "id": "489e290f-79f6-4c62-b8db-9e046bb19d93",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the input (array of emails)\nconst emails = $input.all().map(item => item.json);\n\n// Sort by internalDate (newest first)\nemails.sort((a, b) => {\n  return Number(b.internalDate) - Number(a.internalDate);\n});\n\n// Return sorted emails back into n8n\nreturn emails.map(email => ({ json: email }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        -1248
+      ],
+      "id": "c1e14b53-2b88-4c79-ab22-84229dd14d24",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.subject }}{{ $json.from }}{{ $json.message }}\n\nYou have to show this info in a nice format.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2656,
+        -1248
+      ],
+      "id": "bd45dfd5-d24b-49ea-ad2d-8bf9b226eeca",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2656,
+        -1072
+      ],
+      "id": "8c0a1159-7d66-4c57-891b-7cf4128f0444",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Extract the recipient's email address, subject line, and message body from the following user input: {{ $('When chat message received').item.json.chatInput }}\n\nOutput format must be:\nEmail ID - ...\nSUBJECT - ...\nMESSAGE - ...\n\nNote: If no subject is provided, create one. Subject and Message must not be empty",
+              "role": "model"
+            },
+            {
+              "content": "={{ $('When chat message received').item.json.chatInput }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        -608
+      ],
+      "id": "e3ad33c9-a9f4-4ca1-9843-4ab672b6d74e",
+      "name": "Message a model5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst textOutput = $input.first().json.content.parts[0].text;\n\nconst parts = textOutput.split('\\n');\n\nconst extractedData = {\n  email: '',\n  subject: '',\n  message: ''\n};\n\nfor (const part of parts) {\n  if (part.startsWith('Email ID -')) {\n    extractedData.email = part.replace('Email ID - ', '').trim();\n  } else if (part.startsWith('SUBJECT -')) {\n    extractedData.subject = part.replace('SUBJECT - ', '').trim();\n  } else if (part.startsWith('MESSAGE -')) {\n    extractedData.message = part.replace('MESSAGE - ', '').trim();\n  }\n}\n\nconst outputItem = $input.first();\noutputItem.json.email_id = extractedData.email;\noutputItem.json.subject = extractedData.subject;\noutputItem.json.message_body = extractedData.message;\n\nreturn $input.all();\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1952,
+        -592
+      ],
+      "id": "97ae6fc3-aa7a-4857-8a38-90c421597daf",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=use this: {{ $json.content.parts[0].text }}\n\nto create a draft email. It consists of the receiver's email ID - {{ $json.email_id }}, subject, and message. If the subject and message is \"NOT PROVIDED,\" then generate one. \n\nShould be in the format - Here is the draft email:\\n\\n**To:**email_id\\n**Subject:** subject\\n**Message:** message\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2208,
+        -576
+      ],
+      "id": "fc8b15c4-2684-4574-b791-a7fae6dfbdeb",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2208,
+        -384
+      ],
+      "id": "b13bbe60-5ed5-40f6-bdcd-21e3aa4c2a3b",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2848,
+        -576
+      ],
+      "id": "9327bbe9-fc9c-425b-80ca-7ea2ec84d40a",
+      "name": "Create a draft",
+      "webhookId": "5a953906-d1fe-439d-b7db-a3673740d482",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FAWiQYpn7J9QCrU5",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const textOutput = $input.first().json.output;\n\nconst extractedData = {\n  email_to: '',\n  subject: '',\n  message: ''\n};\n\n// Split the text into an array of lines\nconst lines = textOutput.split('\\n');\n\nlet isMessage = false;\n\nfor (const line of lines) {\n  // Check if we are at the start of the message\n  if (line.trim().startsWith('**Message:**')) {\n    isMessage = true;\n    // Start collecting the message content from this line\n    extractedData.message += line.replace(/\\*|Message:/g, '').trim() + '\\n';\n    continue;\n  }\n\n  // If we are already in the message body, append the line\n  if (isMessage) {\n    extractedData.message += line.trim() + '\\n';\n  }\n\n  // Handle other fields\n  const cleanLine = line.replace(/\\*/g, '').trim();\n\n  if (cleanLine.startsWith('To:')) {\n    extractedData.email_to = cleanLine.replace('To:', '').trim();\n  } else if (cleanLine.startsWith('Subject:')) {\n    extractedData.subject = cleanLine.replace('Subject:', '').trim();\n  }\n}\n\n// Clean up any leading/trailing whitespace and newlines from the message\nextractedData.message = extractedData.message.trim();\n\n// Return updated JSON\nconst outputItem = $input.first();\noutputItem.json.email_to = extractedData.email_to;\noutputItem.json.subject = extractedData.subject;\noutputItem.json.message = extractedData.message;\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2544,
+        -576
+      ],
+      "id": "3e4bff66-61ba-4ad0-90ec-1402427b4dae",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "656d720a-3748-4e13-81fb-0069b14fd2e4",
+              "name": "Answer",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -304,
+        608
+      ],
+      "id": "d836e780-5643-4916-9736-c014fcb1da5a",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "message": "={{ $json.content.parts[0].text }}",
+        "waitUserReply": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        288,
+        576
+      ],
+      "id": "20c175e7-b29d-4b49-9178-f6c85117a453",
+      "name": "Respond to Chat"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Make the output in humanize format. Like normal english.",
+              "role": "model"
+            },
+            {
+              "content": "={{ $json.Answer }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        400
+      ],
+      "id": "58335e0a-95da-41ca-a622-403ba52ee266",
+      "name": "Message a model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a helpful and empathetic AI assistant. \nYour job is to provide answers in a clear, structured, and step-by-step format. \nAlways use headings, numbered steps, and bullet points so users can easily follow the advice. \nWhere appropriate, add emojis to make the response friendly and engaging.\nUser's wuestion - {{ $('When chat message received').item.json.chatInput }}\nRules for your responses:\n- Start with a short, empathetic introduction (1–2 sentences).\n- Break down advice into sections with clear headings (e.g., \"Step 1: Assess the Situation\").\n- Use numbered steps for actions and bullet points for details.\n- Highlight urgent or critical warnings with ⚠️.\n- End with a short, encouraging or cautionary note (e.g., “Consult a professional if needed”).\n- Keep the tone supportive, simple, and professional.\n\nExample style:\n\n## 🖐 What To Do If Your Hand Is Swollen\n/n\n### 1. Assess the Situation\n- Observe symptoms\n- Think about recent causes\n/n\n### 2. Initial Self-Care\n- Elevate your hand\n- Rest and avoid strain\n- Apply cold compress\n- Remove jewelry\n\n### 3. Contact a Medical Professional\n- When swelling started\n- Other symptoms\n\n### 4. Seek Immediate Medical Attention If:\n- Severe or sudden swelling\n- Difficulty breathing\n- Signs of infection\n/n\n⚠️ Important: Always consult a healthcare professional for diagnosis.\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        752
+      ],
+      "id": "51434140-ec5d-4a2d-8f30-fb479217b402",
+      "name": "AI Agent4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        656,
+        1024
+      ],
+      "id": "4b756db4-0efe-446c-b5e0-5e0a22232b1c",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json.output;\nlet result = `## ${data.title}\\n\\n`;\n\nfor (const section of data.sections) {\n  result += `### ${section.heading}\\n`;\n  for (const step of section.steps) {\n    result += `- ${step}\\n`;\n  }\n  result += `\\n`;\n}\n\nreturn [{ json: { text: result } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        816
+      ],
+      "id": "94319f34-df52-4de3-bce5-99497e710913",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1648,
+        1104
+      ],
+      "id": "68ca4dde-1f80-4497-8b49-b96eb136ab21",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "message": "={{ $json.text }}",
+        "waitUserReply": false,
+        "options": {
+          "memoryConnection": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        896
+      ],
+      "id": "d4e15315-3c16-4826-81c3-e741717709e2",
+      "name": "Respond to Chat1"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"title\": \"What To Do If Your Hand Is Swollen\",\n  \"sections\": [\n    {\n      \"heading\": \"Assess the Situation\",\n      \"steps\": [\n        \"Observe symptoms (localized vs whole hand, pain, redness, warmth, movement issues)\",\n        \"Think about possible causes (injury, bug bite, jewelry, other symptoms)\"\n      ]\n    },\n    {\n      \"heading\": \"Initial Self-Care\",\n      \"steps\": [\n        \"Elevate your hand above heart level\",\n        \"Rest and avoid unnecessary use\",\n        \"Apply a cold compress (15–20 minutes, wrapped in cloth, if no open wounds)\",\n        \"Remove jewelry to prevent constriction\"\n      ]\n    },\n    {\n      \"heading\": \"Contact a Medical Professional\",\n      \"steps\": [\n        \"Be ready to share: when swelling started, sudden vs gradual onset, pain/numbness, injuries, insect bites, new medications, other symptoms\"\n      ]\n    },\n    {\n      \"heading\": \"Seek Immediate Medical Attention If\",\n      \"steps\": [\n        \"Sudden, severe swelling\",\n        \"Difficulty breathing or swallowing\",\n        \"Fever with red streaks\",\n        \"Extreme pain, numbness, or deformity\",\n        \"Blisters, open wounds, or suspected broken bone\"\n      ]\n    }\n  ],\n  \"note\": \"Always consult a healthcare professional for accurate diagnosis and treatment.\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        1040
+      ],
+      "id": "ac9e2fcc-8e92-4740-be3b-0492a456e3c2",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        1296
+      ],
+      "id": "1a205639-ec7f-4b01-ad67-c013fb28063f",
+      "name": "Google Gemini Chat Model5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        816,
+        1152
+      ],
+      "id": "08af3a79-bd37-44b0-9c8e-c77fc1a2a41b",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "message": "={{ $json.output }}",
+        "waitUserReply": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1,
+      "position": [
+        3008,
+        -1248
+      ],
+      "id": "dc7346a3-88ec-4e94-8c5a-c1c3c92b230d",
+      "name": "Respond to Chat2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an intent classifier for a student assistant.\n\nIf there is any attachment, then extract the information in JSON format.\nClassify the user’s request into one of these categories:\n- EMAIL: any keyword associated with email comes here unless the user does not want anything to do with checking, sending, or drafting an email.\n- BUDGET\n- HEALTH\n- SCHEDULE\n- GENERAL\n\nUser message: {{ $json.chatInput }}\n\n------------------------------------------------------------------\nReturn ONLY in this JSON format if isRecurring is false:\n\n{\n  \"category\": \"EMAIL | BUDGET | HEALTH | SCHEDULE | GENERAL\",\n  \"isRecurring\": \"true|false\" ,\n  \"schedule_category\": \"CREATE|DELETE|UPDATE\",\n  \"files\": {{ $json.files || [] }}\n}\n\nThe files may have summary, class_number as description, start_time, end_time, day and location.\n\n{\n  \"day\": \"Monday\",\n  \"summary\": \"CSCI 3120-01\"\n  \"class_number\": 10837,\n  \"start_time\": \"10:05AM\",\n  \"end_time\": \"11:25AM\",\n  \"location\": \"CHEMISTRY 125\"\n}\n\n-----------------------------------------------------------------\n\nReturn ONLY in this JSON format if isRecurring is true:\n\n{\n  \"category\": \"EMAIL | BUDGET | HEALTH | SCHEDULE | GENERAL\",\n  \"isRecurring\": \"true|false\",\n  \"schedule_category\": \"CREATE|DELETE|UPDATE\",\n  \"end_date_recurring\": end_date_recurring (in hh:mm:ss format),\n  \"start_date_recurring\": start_date_recurring (in hh:mm:ss format),\n  \"recurrence_frequency\": \"Daily|Weekly|Monthly|Annually\" (capital letter at the start of word only),\n  \"files\": {{ $json.files || [] }}\n}\n\nThe files may have summary, class_number as description, start_time, end_time, day and location.\n\n{\n  \"day\": \"Monday\",\n  \"summary\": \"CSCI 3120-01\"\n  \"class_number\": 10837,\n  \"start_time\": \"10:05AM\",\n  \"end_time\": \"11:25AM\",\n  \"location\": \"CHEMISTRY 125\"\n}\n\n------------------------------------------------------------------\n\nIf no files, then the output should be according to what the user asked:\n{\n    \"category\": \"EMAIL | BUDGET | HEALTH | SCHEDULE | GENERAL\",\n    \"schedule_category\": \"CREATE|DELETE|UPDATE\",\n    \"class_number\": \"class_number\" or \"summary|title: \"title\" (according to what user provides),\n    \"date\": \"date of the event (if provided)\"\n}\n\n-----------------------------------------------------------------\n\nIf the user asks to update then:\n{\n    \"category\": \"EMAIL | BUDGET | HEALTH | SCHEDULE | GENERAL\",\n    \"schedule_category\": \"CREATE|DELETE|UPDATE\",\n    \"class_number\": \"class_number\" or \"summary|title: \"title\" (according to what user provides),\n    \"date\": \"date of the event (if provided)\"\n}\n\n-----------------------------------------------------------------\n\nIf the intent is \"BUDGET\" then return just the query itself along with category.\n  category: BUDGET\n  output: ...",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        -64
+      ],
+      "id": "5487128c-0536-41ce-936e-5affedab8a01",
+      "name": "AI Agent5",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -80,
+        96
+      ],
+      "id": "a17e0fe1-f7bd-4b3d-98c6-628d55b39e88",
+      "name": "Simple Memory2"
+    },
+    {
+      "parameters": {
+        "jsCode": "let rawJson = $input.first().json.output;\n\nrawJson = rawJson.replace(/```json\\n?/, '').replace(/```$/, '');\n\n   const data = JSON.parse(rawJson);\n\n    const category = data.category;\n    const files = data.files;\n    const isRecurring = data.isRecurring;\n    const end_date_recurring = data.end_date_recurring;\nconst start_date_recurring = data.start_date_recurring\n    const recurrence_frequency = data.recurrence_frequency;\n    const date = data.date;\n    const schedule_category = data.schedule_category;\n    const class_number = data.class_number;\n    const title = data.title;\n    const output = data.output;\n\n    return {\n      category,\n      isRecurring,\n      end_date_recurring,\n      start_date_recurring,\n      recurrence_frequency,\n      schedule_category,\n      date,\n      class_number,\n      title,\n      files,\n      output\n    };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        -64
+      ],
+      "id": "32acb34f-21b1-4f3d-86ff-5a35f9ce7a0e",
+      "name": "Code in JavaScript7"
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- input ---\nconst data = $input.first().json;\nconst files = Array.isArray(data.files) ? data.files : [];\n\n// --- helpers ---\nfunction pad(n){ return String(n).padStart(2,'0'); }\n\n// normalize date formats into YYYY-MM-DD\nfunction normalizeDate(dateStr) {\n  if (!dateStr) return null;\n\n  // Already in YYYY-MM-DD\n  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(dateStr)) return dateStr;\n\n  // Try parsing human-readable like \"8 October 2025\"\n  const d = new Date(dateStr);\n  if (!isNaN(d)) {\n    const yyyy = d.getFullYear();\n    const mm = String(d.getMonth() + 1).padStart(2, '0');\n    const dd = String(d.getDate()).padStart(2, '0');\n    return `${yyyy}-${mm}-${dd}`;\n  }\n\n  throw new Error(`Invalid date format: \"${dateStr}\"`);\n}\n\n// parse flexible time formats into [hh,mm,ss]\nfunction parseTimeParts(raw) {\n  if (!raw) throw new Error('Empty time string');\n  const s = raw.trim();\n\n  // hh:mm am/pm  (with optional space)\n  let m = s.match(/^(\\d{1,2}):(\\d{2})\\s*([AaPp][Mm])$/);\n  if (m) {\n    let hh = parseInt(m[1],10), mm = parseInt(m[2],10);\n    const ampm = m[3].toUpperCase();\n    if (ampm === 'PM' && hh !== 12) hh += 12;\n    if (ampm === 'AM' && hh === 12) hh = 0;\n    return [hh, mm, 0];\n  }\n\n  // hh:mm  (24-hour)\n  m = s.match(/^(\\d{1,2}):(\\d{2})$/);\n  if (m) return [parseInt(m[1],10), parseInt(m[2],10), 0];\n\n  // hh am/pm  (no minutes)\n  m = s.match(/^(\\d{1,2})\\s*([AaPp][Mm])$/);\n  if (m) {\n    let hh = parseInt(m[1],10);\n    const ampm = m[2].toUpperCase();\n    if (ampm === 'PM' && hh !== 12) hh += 12;\n    if (ampm === 'AM' && hh === 12) hh = 0;\n    return [hh, 0, 0];\n  }\n\n  // compact \"105pm\" (no colon)\n  m = s.match(/^(\\d{1,2})(\\d{2})$/);\n  if (m) return [parseInt(m[1],10), parseInt(m[2],10), 0];\n\n  throw new Error(`Invalid time format: \"${raw}\"`);\n}\n\n// if startRaw contains \"start - end\" and endRaw missing, split it\nfunction extractStartEnd(startRaw, endRaw) {\n  if (!startRaw && !endRaw) return [null, null];\n  if (startRaw && !endRaw && /[-–—]/.test(startRaw)) {\n    const parts = startRaw.split(/[-–—]/).map(p => p.trim()).filter(Boolean);\n    return [ parts[0] || null, parts[1] || null ];\n  }\n  return [ startRaw ? startRaw.trim() : null, endRaw ? endRaw.trim() : null ];\n}\n\n// build dateTime object for Google Calendar\nfunction buildDateTimeObj(dateStr, timeStr) {\n  dateStr = normalizeDate(dateStr);\n  const [year, month, day] = dateStr.split('-').map(n => parseInt(n,10));\n  if (![year,month,day].every(Number.isFinite)) throw new Error(`Invalid date \"${dateStr}\"`);\n  const [hh, mm/*,ss*/] = parseTimeParts(timeStr);\n  return {\n    dateTime: `${pad(year)}-${pad(month)}-${pad(day)}T${pad(hh)}:${pad(mm)}:00`,\n    timeZone: \"America/Halifax\"\n  };\n}\n\n// align a base date forward to the next occurrence of targetDay\nfunction alignDateToDay(baseDateStr, targetDay) {\n  baseDateStr = normalizeDate(baseDateStr);\n  const map = {\n    sunday: 0, monday: 1, tuesday: 2, wednesday: 3,\n    thursday: 4, friday: 5, saturday: 6\n  };\n  const target = map[String(targetDay || '').toLowerCase()];\n  if (target === undefined) return baseDateStr;\n  const d = new Date(baseDateStr + 'T00:00:00');\n  let attempts = 0;\n  while (d.getDay() !== target && attempts < 10) { d.setDate(d.getDate() + 1); attempts++; }\n  return d.toISOString().slice(0,10);\n}\n\n// parse file.day field into BYDAY codes (MO,TU,...)\nfunction getByDayCodes(dayField) {\n  if (!dayField) return '';\n  let days = [];\n  if (Array.isArray(dayField)) days = dayField;\n  else {\n    days = String(dayField).split(/[,;\\/]|(?:\\band\\b)|(?:&)/i).map(s => s.trim()).filter(Boolean);\n    if (days.length === 1 && /\\s+/.test(days[0])) days = days[0].split(/\\s+/).map(s=>s.trim()).filter(Boolean);\n  }\n  const map = { monday:'MO', tuesday:'TU', wednesday:'WE', thursday:'TH', friday:'FR', saturday:'SA', sunday:'SU' };\n  const codes = days.map(d => map[String(d).toLowerCase()]).filter(Boolean);\n  return codes.join(',');\n}\n\n// add hours to a date string\nfunction addHoursToDateTime(dateStr, timeParts, hoursToAdd) {\n  dateStr = normalizeDate(dateStr);\n  const [y,m,d] = dateStr.split('-').map(n=>parseInt(n,10));\n  const [hh,mm,ss] = timeParts;\n  const dt = new Date(y, m-1, d, hh, mm, ss);\n  dt.setHours(dt.getHours() + hoursToAdd);\n  return `${dt.getFullYear()}-${pad(dt.getMonth()+1)}-${pad(dt.getDate())}T${pad(dt.getHours())}:${pad(dt.getMinutes())}:00`;\n}\n\n// --- main ---\nconst events = [];\n\nfor (const file of files) {\n  try {\n    let rawStart = file.start_time || file.start || file.time || file.time_range || file.timeRange || '';\n    let rawEnd   = file.end_time   || file.end   || '';\n\n    [rawStart, rawEnd] = extractStartEnd(rawStart, rawEnd);\n    if (!rawStart) throw new Error('Missing start time for file');\n\n    let baseDate = normalizeDate(data.start_date_recurring || data.start_date || new Date().toISOString().slice(0,10));\n    if (file.day) baseDate = alignDateToDay(baseDate, file.day);\n\n    if (!rawEnd) {\n      const startParts = parseTimeParts(rawStart);\n      const endIso = addHoursToDateTime(baseDate, startParts, 1);\n      rawEnd = endIso.split(\"T\")[1].slice(0,5); // \"HH:MM\"\n    }\n\n    const startObj = buildDateTimeObj(baseDate, rawStart);\n    const endObj   = buildDateTimeObj(baseDate, rawEnd);\n\n    const event = {\n      summary: file.summary || file.course || '',\n      description: `Class Number: ${file.class_number || ''}`,\n      location: file.location || '',\n      start: startObj,\n      end: endObj,\n      recurrence_frequency: $input.first().json.recurrence_frequency,\n      end_date_recurring: $input.first().json.end_date_recurring,\n      start_date_recurring: $input.first().json.start_date_recurring\n    };\n\n    if (data.isRecurring && data.end_date_recurring) {\n      const until = normalizeDate(data.end_date_recurring).replace(/-/g,'');\n      const byday = getByDayCodes(file.day);\n      const freq = (data.recurrence_frequency || 'WEEKLY').toUpperCase();\n      const rule = byday ? `RRULE:FREQ=${freq};BYDAY=${byday};UNTIL=${until}T235959Z`\n                         : `RRULE:FREQ=${freq};UNTIL=${until}T235959Z`;\n      event.recurrence = [ rule ];\n    }\n\n    console.log('Event ready:', event.summary, event.start.dateTime, '->', event.end.dateTime, 'BYDAY=', file.day);\n    events.push({ json: event });\n\n  } catch (err) {\n    events.push({ json: { error: err.message, file } });\n  }\n}\n\nreturn events;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        304
+      ],
+      "id": "e32644c5-e371-4ab3-b7be-be9d6c3e607e",
+      "name": "Code in JavaScript8",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.schedule_category }}",
+                    "rightValue": "CREATE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "3cf5930f-dcfa-4e69-95ab-bcdffa43ffc9"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CREATE"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cea59718-ede1-45eb-a4ca-40eb14aaf014",
+                    "leftValue": "={{ $json.schedule_category }}",
+                    "rightValue": "DELETE",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "DELETE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        992,
+        368
+      ],
+      "id": "7c6fd448-8ebe-43bf-9a99-8c0670506709",
+      "name": "Switch2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        112
+      ],
+      "id": "a9f8fa90-22ce-433b-8406-3ffcab5f22b5",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -576
+      ],
+      "id": "27c63767-a77a-47f6-bb89-6d0c39905779",
+      "name": "Google Gemini Chat Model6",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a calendar manager and now i want you to return {{ $json.id }}\njust return\n   {{ $json.id }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2000,
+        528
+      ],
+      "id": "a7fe81c1-0840-4165-add6-74a923b30b0e",
+      "name": "AI Agent6"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        752
+      ],
+      "id": "790bfe22-624f-47a3-a166-a56e6465596e",
+      "name": "Google Gemini Chat Model7",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// Target date and class from Switch2\nconst targetDate = $('Switch2').first().json.date;\nconst targetClass = ($('Switch2').first().json.class_number || \"\");\n\n// Normalize strings (remove spaces/dashes, lowercase)\nconst normalize = str => str.replace(/\\s|-/g, '').toLowerCase();\nconst normalizedTargetClass = normalize(targetClass);\n\nlet output = [];\n\nfor (const item of items) {\n  const event = item.json;\n\n  // Extract event date (timed, all-day, or recurring)\n  let eventDate = null;\n\n  if (event.start) {\n    if ('dateTime' in event.start && event.start.dateTime) {\n      eventDate = event.start.dateTime.split(\"T\")[0];\n    } else if ('date' in event.start && event.start.date) {\n      eventDate = event.start.date;\n    }\n  } else if (event.originalStartTime?.dateTime) {\n    eventDate = event.originalStartTime.dateTime.split(\"T\")[0];\n  }\n\n  // Normalize summary and description\n  const normalizedSummary = normalize(event.summary || \"\");\n  const normalizedDescription = normalize(event.description || \"\");\n\n  // Check if class matches\n  const classMatches = normalizedSummary.includes(normalizedTargetClass) || normalizedDescription.includes(normalizedTargetClass);\n\n  // Check if date matches\n  const dateMatches = eventDate === targetDate;\n\n  // Push matching events\n  if (classMatches && dateMatches) {\n    output.push({ json: event });\n  }\n}\n\n// If no matches, push a debug object instead\nif (output.length === 0) {\n  output.push({\n    json: {\n      message: \"No matching events found\",\n      lookingFor: { targetDate, targetClass },\n      checkedEvents: items.length\n    }\n  });\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        608
+      ],
+      "id": "2132862a-f52e-473b-b786-ed6b64d1ee04",
+      "name": "Code in JavaScript9"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "akashmaitycad@gmail.com",
+          "mode": "list",
+          "cachedResultName": "akashmaitycad@gmail.com"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1392,
+        528
+      ],
+      "id": "95331865-bc92-47c2-90aa-66aa08967f9d",
+      "name": "Get many events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "z6b5692cSGwFKZQi",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "akashmaitycad@gmail.com",
+          "mode": "list",
+          "cachedResultName": "akashmaitycad@gmail.com"
+        },
+        "eventId": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        2512,
+        672
+      ],
+      "id": "22d867ef-0b88-491e-a0e7-bdbba81ff369",
+      "name": "Delete an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "z6b5692cSGwFKZQi",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a helpful assistant. You are used to save expense or income. You always refer to 2025 as in date.\nRecord this: {{ $json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        -256
+      ],
+      "id": "bc4a1a69-2c7c-4407-8eb6-e10b2b54f5a1",
+      "name": "AI Agent7"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        -48
+      ],
+      "id": "f2590cd9-1ac1-41f9-8d90-6655e3bc883f",
+      "name": "Google Gemini Chat Model8",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1216,
+        48
+      ],
+      "id": "6ebd0b2a-77d1-4846-b5ee-67559e0deeb7",
+      "name": "Simple Memory3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4454379c-f0de-438a-b538-91649aac2207",
+              "name": "response",
+              "value": "={{ $('When chat message received').item.json.chatInput }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1456,
+        -256
+      ],
+      "id": "4ddc8446-c1c1-4828-8dee-0ffb158c8155",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "text": "=Extract the data in JSON format\nQuery -  {{ $json.response }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "cost",
+              "type": "number",
+              "description": "this is the cost of the expense or income",
+              "required": true
+            },
+            {
+              "name": "date",
+              "type": "date",
+              "description": "the date on which it was bought or earned",
+              "required": true
+            },
+            {
+              "name": "description",
+              "description": "Description on what was bought",
+              "required": true
+            },
+            {
+              "name": "type",
+              "description": "expense or income",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        1696,
+        -240
+      ],
+      "id": "a621b3bd-7a8d-44e5-b981-bd2490f87c10",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        -16
+      ],
+      "id": "0b9f9864-e40b-4a73-9083-576be35c4555",
+      "name": "Google Gemini Chat Model9",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MZ0FyFWEALUqnP6A",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1deAT19f2YXe8jqteZSGqI3okc1T71hfTfa1xTd_WDjU",
+          "mode": "list",
+          "cachedResultName": "Spreadsheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1deAT19f2YXe8jqteZSGqI3okc1T71hfTfa1xTd_WDjU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1deAT19f2YXe8jqteZSGqI3okc1T71hfTfa1xTd_WDjU/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "DESCRIPTION": "={{ $json.output.description }}",
+            "TYPE": "={{ $json.output.type }}",
+            "DATE": "={{ $json.output.date }}",
+            "COST": "={{ $json.output.cost }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "DESCRIPTION",
+              "displayName": "DESCRIPTION",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "COST",
+              "displayName": "COST",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "DATE",
+              "displayName": "DATE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "TYPE",
+              "displayName": "TYPE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2080,
+        -192
+      ],
+      "id": "f8d737fa-e340-434b-9feb-40584aa8a87e",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IYSwnfHYxPCaBwLy",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "akashmaitycad@gmail.com",
+          "mode": "list",
+          "cachedResultName": "akashmaitycad@gmail.com"
+        },
+        "start": "={{ $json.start.dateTime }}",
+        "end": "={{ $json.end.dateTime }}",
+        "additionalFields": {
+          "description": "={{ $json.description }}",
+          "location": "={{ $json.location }}",
+          "repeatFrecuency": "={{ $json.recurrence_frequency }}",
+          "repeatUntil": "={{ $json.end_date_recurring }}",
+          "summary": "={{ $json.summary }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        1728,
+        240
+      ],
+      "id": "625f3bac-6327-4831-9f34-ce55b9b1e0bb",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "DzSG6pvzcyqIVdlg",
+          "name": "Google Calendar account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2048,
+        -1248
+      ],
+      "id": "5170452a-58a7-44e7-83ec-4210b3e1dcfc",
+      "name": "Get many messages",
+      "webhookId": "3fca18b4-2569-49cf-95b8-ea6cc7592a92",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FAWiQYpn7J9QCrU5",
+          "name": "Gmail account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const subject = $input.first().json.Subject || \"No Subject\";\nconst from = $input.first().json.From || \"Unknown Sender\";\nconst snippet = $input.first().json.snippet|| \"\";\n\nreturn [\n  {\n    json: {\n      subject: subject,\n      from: from,\n      message: snippet\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2448,
+        -1248
+      ],
+      "id": "a1187b81-6a4e-411f-a5f2-e2b8ebd20f46",
+      "name": "Code in JavaScript10"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent7",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a model2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [],
+        []
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Message a model3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Message a model5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Get many messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript10",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Chat2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "Create a draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Message a model4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model4": {
+      "main": [
+        [
+          {
+            "node": "Respond to Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent4": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "Respond to Chat1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Respond to Chat1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript7": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript8": {
+      "main": [
+        [
+          {
+            "node": "Create an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript8",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model6": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent6": {
+      "main": [
+        [
+          {
+            "node": "Delete an event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model7": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent6",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript9": {
+      "main": [
+        [
+          {
+            "node": "AI Agent6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent7": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model8": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent7",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent7",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model9": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "main": [
+        []
+      ]
+    },
+    "Get many messages": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript10": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e014c38c3895c1877d0bf378c2a952fbeb90311ea99f8c8b8c974a95ef9d8aba"
+  }
+}
